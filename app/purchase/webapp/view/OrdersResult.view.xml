@@ -1,0 +1,43 @@
+<mvc:View
+    controllerName="purchase.controller.OrdersResult"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page id="_IDGenPage1" title="Purchase Orders History">
+
+        <content>
+
+            <Table
+                id="approvalTable"
+                items="{/ApprovalDecisions}">
+
+                <columns>
+                    <Column id="_IDGenColumn5"><Text id="_IDGenText12" text="Purchase Order"/></Column>
+                    <Column id="_IDGenColumn6"><Text id="_IDGenText13" text="Supplier"/></Column>
+                    <Column id="_IDGenColumn7"><Text id="_IDGenText14" text="Date"/></Column>
+                    <Column id="_IDGenColumn621"><Text id="_IDGenText1311" text="Result"/></Column>
+                    <Column id="_IDGenColumn81"><Text id="_IDGenText151" text="Description"/></Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem id="_IDGenColumnListItem2">
+
+                        <cells>
+
+                            <Text id="_IDGenText16" text="{PurchaseOrder}"/>
+                            <Text id="_IDGenText17" text="{Supplier}"/>
+                            <Text id="_IDGenText18" text="{PurchaseOrderDate}"/>
+                            <Text id="_IDGenText196" text="{Result}"/>
+                            <Text id="_IDGenText197" text="{Description}"/>
+                            
+                        </cells>
+
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+
+        </content>
+    </Page>
+
+</mvc:View>

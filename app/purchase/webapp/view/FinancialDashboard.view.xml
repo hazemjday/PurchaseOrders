@@ -1,0 +1,60 @@
+<mvc:View
+    controllerName="purchase.controller.FinancialDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page id="_IDGenPage11" title="Financial Dashboard">
+<headerContent>
+
+        <Button id="_IDGenButton1"
+            text="Download CSV"
+            icon="sap-icon://download"
+            type="Emphasized"
+            press=".onDownloadCSV"/>
+
+    </headerContent>
+        <content>
+
+            <Table
+             id="approvalTable1"
+             items="{
+                 path: '/ApprovalDecisions',
+                 filters: [{
+                 path: 'Result',
+                 operator: 'EQ',
+                 value1: 'Accepted'
+            }]
+             }">
+
+                <columns>
+
+                    <Column id="_IDGenColumn51"><Text id="_IDGenText1112" text="Purchase Order"/></Column>
+                    <Column id="_IDGenColumn61"><Text id="_IDGenText113" text="Supplier"/></Column>
+                    <Column id="_IDGenColumn71"><Text id="_IDGenText114" text="Date"/></Column>
+                  <Column id="_IDGenColumn62"><Text id="_IDGenText131" text="Cost"/></Column>
+                    <Column id="_IDGenColumn63"><Text id="_IDGenText121" text="Currency"/></Column>
+
+                </columns>
+
+                <items>
+                    <ColumnListItem id="_IDGenColumnListItem21">
+
+                        <cells>
+
+                            <Text id="_IDGenText161" text="{PurchaseOrder}"/>
+                            <Text id="_IDGenText171" text="{Supplier}"/>
+                            <Text id="_IDGenText1811" text="{PurchaseOrderDate}"/>
+                            <Text id="_IDGenText191" text="{TotalAmount}"/>
+                            <Text id="_IDGenText192" text="{Currency}"/>
+                            
+                        </cells>
+
+                    </ColumnListItem>
+                </items>
+
+            </Table>
+
+        </content>
+    </Page>
+
+</mvc:View>

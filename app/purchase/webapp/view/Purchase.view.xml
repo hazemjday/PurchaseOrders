@@ -1,0 +1,60 @@
+<mvc:View controllerName="purchase.controller.Purchase"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="page" title="{i18n>title}">
+    <Toolbar id="_IDGenToolbar1">
+    <Title id="_IDGenTitle" text="Purchase Orders"/>
+    <ToolbarSpacer id="_IDGenToolbarSpacer"/>
+    
+    <Button id="_IDGenButton"
+        text="Orders Results"
+        type="Emphasized"
+        icon="sap-icon://table-view"
+        press=".onNavigateToResults"/>
+    <Button id="_IDGenButton2"
+        text="Financial Report"
+        type="Emphasized"
+        icon="sap-icon://line-chart"
+        press=".onNavigateToFinance"/>
+
+</Toolbar>
+     <Table id="_IDGenTable1" items="{orders>/orders}">
+
+        <columns>
+            <Column id="_IDGenColumn">
+                <Text id="_IDGenText" text="PO Number"/>
+            </Column>
+
+            <Column id="_IDGenColumn1">
+                <Text id="_IDGenText1" text="Supplier"/>
+            </Column>
+           
+            <Column id="_IDGenColumn11">
+                <Text id="_IDGenText11" text="Order Date"/>
+            </Column>
+             <Column id="_IDGenColumn121">
+                <Text id="_IDGenText112" text="Payment Terms"/>
+            </Column>
+            <Column id="_IDGenColumn1213">
+                <Text id="_IDGenText1123" text="Country"/>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem id="_IDGenColumnListItem"  type="Navigation"
+    press="onPOPress">
+
+                <cells>
+                    <Text id="_IDGenText2" text="{orders>PurchaseOrder}"/>
+                    <Text id="_IDGenText3" text="{orders>Supplier}"/>
+                    <Text id="_IDGenText33" text="{orders>PurchaseOrderDate}"/>
+                     <Text id="_IDGenText35" text="{orders>PaymentTerms}"/>
+                    <Text id="_IDGenText34" text="{orders>TaxReturnCountry}"/>
+                </cells>
+
+            </ColumnListItem>
+        </items>
+
+    </Table>
+    </Page>
+</mvc:View>

@@ -1,0 +1,249 @@
+_schema-version: 3.3.0
+ID: Purchase
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: Purchase-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: Purchase-auth
+  - name: Purchase-db
+  - name: Purchase-messaging
+  - name: Purchase-connectivity
+  - name: Purchase-destination
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: Purchase-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: Purchase-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: Purchase
+  type: approuter.nodejs
+  path: app/router
+  requires:
+  - name: srv-api
+    group: destinations
+    properties:
+      forwardAuthToken: true
+      name: srv-api
+      url: ~{srv-url}
+  - name: Purchase-auth
+  - name: Purchase-destination
+  - name: Purchase-html5-runtime
+  - name: Purchase-portal
+  provides:
+  - name: app-api
+    properties:
+      app-protocol: ${protocol}
+      app-uri: ${default-uri}
+  parameters:
+    disk-quota: 256M
+    keep-existing-routes: true
+    memory: 256M
+- name: Purchase-app-deployer
+  type: com.sap.application.content
+  path: gen
+  requires:
+  - name: Purchase-auth
+  - name: srv-api
+  - name: Purchase-html5-repo-host
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+      content-target: true
+  build-parameters:
+    build-result: app/
+    requires:
+    - artifacts:
+      - admin-authors.zip
+      name: Purchaseadminauthors
+      target-path: app/
+    - artifacts:
+      - admin-books.zip
+      name: Purchaseadminbooks
+      target-path: app/
+    - artifacts:
+      - browse.zip
+      name: Purchasebrowse
+      target-path: app/
+    - artifacts:
+      - genres.zip
+      name: Purchasegenres
+      target-path: app/
+    - artifacts:
+      - purchase.zip
+      name: purchase
+      target-path: app/
+- name: Purchaseadminauthors
+  type: html5
+  path: app/admin-authors
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm ci
+    - npm run build
+    supported-platforms: []
+- name: Purchaseadminbooks
+  type: html5
+  path: app/admin-books
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm ci
+    - npm run build
+    supported-platforms: []
+- name: Purchasebrowse
+  type: html5
+  path: app/browse
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm ci
+    - npm run build
+    supported-platforms: []
+- name: Purchasegenres
+  type: html5
+  path: app/genres
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm ci
+    - npm run build
+    supported-platforms: []
+- name: Purchase-portal-deployer
+  type: com.sap.application.content
+  path: app/portal
+  requires:
+  - name: Purchase-portal
+    parameters:
+      content-target: true
+      service-key:
+        config:
+          content-endpoint: developer
+        name: Purchase-portal-key
+  - name: Purchase-auth
+  - name: Purchase-html5-repo-host
+  - name: Purchase-app-deployer
+  deployed-after:
+  - Purchase-app-deployer
+- name: notification-content-deployment
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: Purchase-destination
+  parameters:
+    disk-quota: 1GB
+    memory: 256MB
+    no-route: true
+    no-start: true
+    tasks:
+    - command: node node_modules/@cap-js/notifications/lib/content-deployment.js
+      disk-quota: 1GB
+      memory: 256MB
+      name: notification-content-deployment
+- name: purchase
+  type: html5
+  path: app/purchase
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: Purchase-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      oauth2-configuration:
+        credential-types:
+        - binding-secret
+        - x509
+        redirect-uris:
+        - https://*~{app-api/app-uri}/**
+      role-collections:
+      - description: generated
+        name: admin (Purchase ${org}-${space})
+        role-template-references:
+        - $XSAPPNAME.admin
+      tenant-mode: dedicated
+      xsappname: Purchase-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+  processed-after:
+  - Purchase-messaging
+  requires:
+  - name: app-api
+- name: Purchase-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: Purchase-messaging
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./event-mesh.json
+    service: enterprise-messaging
+    service-plan: default
+- name: Purchase-connectivity
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: connectivity
+    service-plan: lite
+- name: Purchase-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+- name: Purchase-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
+- name: Purchase-html5-runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-runtime
+- name: Purchase-portal
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: portal
+    service-plan: standard
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
